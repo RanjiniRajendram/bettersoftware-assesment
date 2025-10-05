@@ -1,5 +1,5 @@
 # bettersoftware-assesment
-Task:
+# Task:
 The goal of the assessment is to deploy Open WebUI in a cloud environment, connect it to Ollama running a lightweight LLM (e.g., Llama 2), and ensure it works end-to-end. Specifically,
  
 1. Deploy Open WebUI on a Kubernetes cluster in a cloud environment (AWS, Azure, or GCP) using Terraform, ensuring it is accessible.
@@ -7,7 +7,7 @@ The goal of the assessment is to deploy Open WebUI in a cloud environment, conne
 3. Debug any issues and provide a short README with deployment steps, configuration details, and any problems you solved (optionally include a small automation script).
 
 
-Choices that are made for this assessment and this complete assessment is done from Windows:
+# Choices that are made for this assessment and this complete assessment is done from Windows:
 
 1. Cloud: Azure free tier services - Though GCP and Azure provide free services to complete this assessment, I chose Azure as I am more familiar with it.
 	- AKS for kubernetes services
@@ -33,7 +33,7 @@ Choices that are made for this assessment and this complete assessment is done f
 	- It is lightweight and is compatible with B2ms Azure VM
 	
 
-Prerequisites: Powershell commandline is used for the entire task
+# Prerequisites: Powershell commandline is used for the entire task
 
 1. An Azure free tier account
 
@@ -52,7 +52,7 @@ ref: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=
 	Set the environment path variable for kubectl and test it using: kubectl version --client
 
 
-Steps to achieve the goal:
+# Steps to achieve the goal:
 
 1. Perform az login and choose the default directory and subscription 1 by clicking Enter
 
@@ -101,16 +101,16 @@ Steps to achieve the goal:
 10. Ask a questions and it should give you a response. There you go, your goal is completed.
 
 	
-Issues faced:
+# Issues faced:
 
 The pods, services and deployments got successfully rolledout. But when I tried accessing the openwebUI using the public cluster IP and prompted in the chat, the model was not loading despite pulling the model in the ollama container. I troubleshooted the following areas:
-	- Checked if ollama url is accessible from openwebui container - it was working and listing the model
-	- Checked the openweb UI pod logs for the issue and found that it was trying to access ollama using the url, host.docker.internal:11434 and the error was 
+	1. Checked if ollama url is accessible from openwebui container - it was working and listing the model
+	2. Checked the openweb UI pod logs for the issue and found that it was trying to access ollama using the url, host.docker.internal:11434 and the error was 
 	2025-10-05 09:59:52.845 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:52.848 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:53.130 | INFO | uvicorn.protocols.http.httptools_impl:send:476 - 10.224.0.4:59881 - "GET /api/models HTTP/1.1" 200
-	- After multiple trial and error methods, updating the environmental variable - name: OLLAMA_BASE_URL with value: "http://ollama:11434" in the openwebui.yaml file fixed the problem. Earlier it was by default taking the value as /ollama and hence the issue.
-	- Additionally the environmental variable - name: DEFAULT_MODEL was assigned with the value: "tinyllama:latest" as we have used that model for this assessment. By adding this openwebUI by default uses this model when prompted.
+	3. After multiple trial and error methods, updating the environmental variable - name: OLLAMA_BASE_URL with value: "http://ollama:11434" in the openwebui.yaml file fixed the problem. Earlier it was by default taking the value as /ollama and hence the issue.
+	4. Additionally the environmental variable - name: DEFAULT_MODEL was assigned with the value: "tinyllama:latest" as we have used that model for this assessment. By adding this openwebUI by default uses this model when prompted.
 
-Technical debts:
+# Technical debts:
 	1. Using a B series model is not recommended for LLM models as it has insufficient resources
 	2. Tinyllama model is specifically used only for testing purposes and is not recommended for prod use
 	3. The environment variables in kubernetes manifests can be configured using configMaps for loading the enviornments during runtime. Here for every change in env, the deployment has to be restarted
