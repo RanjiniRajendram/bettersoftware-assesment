@@ -103,10 +103,14 @@ ref: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=
 	
 # Issues faced:
 
-The pods, services and deployments got successfully rolledout. But when I tried accessing the openwebUI using the public cluster IP and prompted in the chat, the model was not loading despite pulling the model in the ollama container. I troubleshooted the following areas:
+The pods, services and deployments got successfully rolledout. But when I tried accessing the openwebUI using the public cluster IP and prompted in the chat, the model was not loading despite pulling the model in the ollama container. 
+
+I troubleshooted the following areas:
 	1. Checked if ollama url is accessible from openwebui container - it was working and listing the model
-	2. Checked the openweb UI pod logs for the issue and found that it was trying to access ollama using the url, host.docker.internal:11434 and the error was 
-	2025-10-05 09:59:52.845 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:52.848 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:53.130 | INFO | uvicorn.protocols.http.httptools_impl:send:476 - 10.224.0.4:59881 - "GET /api/models HTTP/1.1" 200
+	2. Checked the openweb UI pod logs for the issue and found that it was trying to access ollama using the url, host.docker.internal:11434 and the error was
+
+2025-10-05 09:59:52.845 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:52.848 | ERROR | open_webui.routers.ollama:send_get_request:106 - Connection error: Cannot connect to host host.docker.internal:11434 ssl:default [Name or service not known] 2025-10-05 09:59:53.130 | INFO | uvicorn.protocols.http.httptools_impl:send:476 - 10.224.0.4:59881 - "GET /api/models HTTP/1.1" 200
+
 	3. After multiple trial and error methods, updating the environmental variable - name: OLLAMA_BASE_URL with value: "http://ollama:11434" in the openwebui.yaml file fixed the problem. Earlier it was by default taking the value as /ollama and hence the issue.
 	4. Additionally the environmental variable - name: DEFAULT_MODEL was assigned with the value: "tinyllama:latest" as we have used that model for this assessment. By adding this openwebUI by default uses this model when prompted.
 
