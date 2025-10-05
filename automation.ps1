@@ -1,6 +1,6 @@
-# ==========================================
+# ===========================================
 # PowerShell Automation Script for Open WebUI + Ollama Deployment
-# ==========================================
+# ===========================================
 
 # -------------------------------
 # Step 1: Azure Login
@@ -92,7 +92,16 @@ kubectl exec -it $ollamaPod -- /bin/bash -c "ollama serve &"
 # Step 9: Display OpenWebUI Service Info
 # -------------------------------
 Write-Host "Getting OpenWebUI public service details..."
-kubectl get svc openwebui -o wide
+$public_ip = kubectl get svc openwebui -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
 
-Write-Host "Deployment automation completed successfully!"
+Write-Host "Accessing OpenWebUI using the EXTERNAL-IP"
+$port = 8080
+$url = "http://${public_ip}:${port}"
 Write-Host "Access OpenWebUI using the EXTERNAL-IP:<PORT> displayed above."
+
+$response = curl $url
+if ($response.StatusCode -eq 200) {
+  Write-Host "✅ OpenWebUI is reachable (HTTP 200 OK)"
+} else {
+  Write-Host "⚠️ OpenWebUI responded with status code: $($response.StatusCode)"
+}
